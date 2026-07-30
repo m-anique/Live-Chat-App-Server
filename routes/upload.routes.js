@@ -5,7 +5,10 @@ const fs = require('fs');
 const router = express.Router();
 const { protect } = require('../middleware/auth.middleware');
 
-const uploadDir = path.join(__dirname, '..', 'uploads');
+const uploadDir = process.env.VERCEL
+  ? '/tmp/uploads'
+  : path.join(__dirname, '..', 'uploads');
+
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -55,9 +58,7 @@ router.post('/', protect, (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'No file was provided' });
     }
-
     const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
-
     res.status(201).json({
       message: 'File uploaded successfully',
       fileUrl,
